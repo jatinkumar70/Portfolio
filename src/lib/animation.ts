@@ -18,6 +18,7 @@ export const ease = {
   soft: 'power3.out',
   snap: 'power4.inOut',
   ui: 'power2.out',
+  servo: 'power4.out',
 } as const
 
 /** Breakpoint contexts for gsap.matchMedia(). */

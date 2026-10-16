@@ -14,6 +14,21 @@ export function Eyebrow({ index, children, className }: { index?: string; childr
   )
 }
 
+/** Full-width section header: indexed label on the left, optional slot on the right. */
+export function SectionBar({ index, label, right, className }: { index?: string; label: ReactNode; right?: ReactNode; className?: string }) {
+  return (
+    <div className={cn('flex items-center justify-between gap-4 border-b border-current/20 pb-3', className)}>
+      <Eyebrow index={index}>{label}</Eyebrow>
+      {right}
+    </div>
+  )
+}
+
+/** Small mono note citing where the figures beside it come from. */
+export function SourceNote({ children, className }: { children: ReactNode; className?: string }) {
+  return <span className={cn('meta', className)}>{children}</span>
+}
+
 const provenanceCopy: Record<Provenance, string> = {
   fact: 'Fact · from resume',
   concept: 'Concept · illustrative reconstruction',
