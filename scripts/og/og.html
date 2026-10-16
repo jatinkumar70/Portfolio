@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face { font-family: 'Archivo'; src: url('../../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); font-weight: 100 900; font-stretch: 62% 125%; }
+  @font-face { font-family: 'Mono'; src: url('../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); font-weight: 100 800; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #fafaf7; }
+  .wrap { position: relative; width: 1200px; height: 630px; box-sizing: border-box; padding: 56px 64px; font-family: 'Archivo'; color: #111; }
+  .grid { position: absolute; inset: 0; background-image: linear-gradient(to right, #e6e5e0 1px, transparent 1px), linear-gradient(to bottom, #e6e5e0 1px, transparent 1px); background-size: 40px 40px; opacity: .7; }
+  .meta { font-family: 'Mono'; font-size: 17px; letter-spacing: .08em; text-transform: uppercase; color: #6a6a66; position: relative; }
+  h1 { position: relative; margin: 54px 0 0; font-weight: 800; font-stretch: 78%; text-transform: uppercase; font-size: 100px; line-height: .86; letter-spacing: -0.04em; }
+  h1 .i { padding-left: 120px; }
+  .dot { color: #ff4a1c; }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 52px; display: flex; justify-content: space-between; align-items: end; border-top: 2px solid #111; padding-top: 18px; }
+  .name { font-weight: 800; font-stretch: 100%; font-size: 30px; text-transform: uppercase; letter-spacing: -0.02em; }
+  .role { font-family: 'Mono'; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; margin-top: 6px; color: #292929; }
+  svg { position: absolute; right: 70px; top: 262px; width: 200px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="grid"></div>
+  <div class="meta">JK / Digital Engineering — Portfolio</div>
+  <h1>Complex systems.<br/><span class="i">Effortless</span><br/>experiences<span class="dot">.</span></h1>
+  <svg viewBox="-4 -4 62 60" fill="none">
+    <circle cx="27" cy="26" r="29" stroke="#cfcdc6" stroke-width=".4"/>
+    <path d="M-4 26 H58 M27 -4 V56" stroke="#cfcdc6" stroke-width=".4"/>
+    <g stroke="#111" stroke-width="3.2" stroke-linecap="square">
+      <path d="M6 8 H26 M20 8 V34 C20 41 15 44 10 44 C6 44 3 41.5 2.5 38"/><path d="M32 8 V44"/><path d="M50 8 L36.5 26 L50 44"/>
+    </g>
+    <rect x="34" y="23.5" width="5" height="5" fill="#ff4a1c"/>
+  </svg>
+  <div class="foot">
+    <div><div class="name">Jatin Kumar</div><div class="role">Senior Frontend Engineer</div></div>
+    <div class="meta">React · TypeScript · Real-time interfaces</div>
+  </div>
+</div>
+</body>
+</html>

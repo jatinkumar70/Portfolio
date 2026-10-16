@@ -1,0 +1,117 @@
+/*
+ * ─────────────────────────────────────────────────────────────
+ *  THEME — the single source of truth for the visual system.
+ *  Change a value here and it flows into Tailwind utilities,
+ *  component CSS and the WebGL scenes (they read these vars).
+ * ─────────────────────────────────────────────────────────────
+ */
+
+:root {
+  /* Core palette */
+  --porcelain: #fafaf7;
+  --paper: #ffffff;
+  --ink: #111111;
+  --charcoal: #292929;
+  --muted: #858585; /* decorative / large text only (3.5:1 on porcelain) */
+  --muted-text: #6a6a66; /* small text that must meet WCAG AA (5.4:1) */
+  --line: #e6e5e0;
+  --line-strong: #cfcdc6;
+
+  /* The one restrained accent. Swap for cobalt (#2340ff) if preferred. */
+  --accent: #ff4a1c;
+  --accent-ink: #c2320c; /* accent for small text — passes AA on white */
+  --accent-soft: #ffe7df;
+
+  /* Understated status colours used inside interface concepts */
+  --ok: #23704a;
+  --ok-soft: #e3f1e9;
+  --warn: #9a5b0c;
+  --warn-soft: #fbefd9;
+  --danger: #b42318;
+  --danger-soft: #fbe6e3;
+  --info: #2b45c4;
+  --info-soft: #e5e9fb;
+
+  --focus: var(--accent-ink);
+  --selection: var(--accent);
+
+  /* Type families */
+  --font-display: 'Archivo Variable', 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Fluid layout tokens */
+  --gutter: clamp(1rem, 3.2vw, 2.75rem);
+  --section-y: clamp(5.5rem, 13vw, 12rem);
+  --header-h: 4.25rem;
+  --shell-max: 1720px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --dur-fast: 180ms;
+  --dur-med: 420ms;
+}
+
+@theme inline {
+  --color-porcelain: var(--porcelain);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-charcoal: var(--charcoal);
+  --color-muted: var(--muted);
+  --color-muted-text: var(--muted-text);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --ease-out-expo: var(--ease-out);
+  --ease-in-out-quart: var(--ease-in-out);
+}
+
+@theme {
+  /* Fluid type scale — use as text-mega, text-display, text-h1 … */
+  --text-mega: clamp(3.1rem, 12.4vw, 13.5rem);
+  --text-mega--line-height: 0.84;
+  --text-mega--letter-spacing: -0.045em;
+
+  --text-display: clamp(2.65rem, 7.6vw, 8rem);
+  --text-display--line-height: 0.88;
+  --text-display--letter-spacing: -0.04em;
+
+  --text-h1: clamp(2.2rem, 5.2vw, 5.25rem);
+  --text-h1--line-height: 0.95;
+  --text-h1--letter-spacing: -0.035em;
+
+  --text-h2: clamp(1.75rem, 3.5vw, 3.4rem);
+  --text-h2--line-height: 1;
+  --text-h2--letter-spacing: -0.03em;
+
+  --text-h3: clamp(1.25rem, 1.9vw, 1.8rem);
+  --text-h3--line-height: 1.12;
+  --text-h3--letter-spacing: -0.015em;
+
+  --text-lead: clamp(1.125rem, 1.45vw, 1.45rem);
+  --text-lead--line-height: 1.45;
+  --text-lead--letter-spacing: -0.01em;
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.35;
+  --text-micro--letter-spacing: 0.08em;
+
+  --breakpoint-xs: 26rem;
+  --breakpoint-3xl: 112rem;
+}
