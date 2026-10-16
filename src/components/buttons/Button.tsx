@@ -4,11 +4,11 @@ import { ArrowRight, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { cn, copyText } from '@/lib/utils'
 import { gsap, motionDisabled } from '@/lib/animation'
 
-type Variant = 'outline' | 'solid' | 'on-ink'
+type Variant = 'outline' | 'solid' | 'ink' | 'ink-outline'
 type Size = 'md' | 'sm'
 
 function classes(variant: Variant, size: Size, className?: string) {
-  return cn('btn', variant === 'solid' && 'btn-solid', variant === 'on-ink' && 'btn-on-ink', size === 'sm' && 'btn-sm', className)
+  return cn('btn', variant === 'solid' && 'btn-solid', variant === 'ink' && 'btn-ink', variant === 'ink-outline' && 'btn-ink-outline', size === 'sm' && 'btn-sm', className)
 }
 
 interface Common {

@@ -1,8 +1,8 @@
 # Jatin Kumar — Portfolio
 
-An editorial portfolio for **Jatin Kumar, Senior Frontend Engineer**: a drafting-studio preloader, a WebGL hero, a sticky stacking-card showcase of real project screenshots, a scroll-reactive toolkit marquee and GSAP scroll animation throughout.
+A cyberpunk portfolio for **Jatin Kumar, Senior Frontend Engineer** — codename **NEON//GRID**: a terminal boot-sequence preloader, a live raw-WebGL neon-city shader hero that warps as you scroll, a scroll-decrypted manifesto, a pinned horizontal project stream, crossed hazard-tape marquees and GSAP ScrollTrigger choreography throughout.
 
-**Stack:** Vite 8 · React 19 · TypeScript 6 (strict) · Tailwind CSS 4 · GSAP 3 (ScrollTrigger, SplitText, DrawSVG, MotionPath) · Lenis · Three.js + React Three Fiber + Drei · React Router 7 · Lucide icons. Fonts are self-hosted (Archivo, Inter, JetBrains Mono via Fontsource).
+**Stack:** Vite 8 · React 19 · TypeScript 6 (strict) · Tailwind CSS 4 · GSAP 3 (ScrollTrigger, SplitText, ScrambleText, CustomEase, DrawSVG) · Lenis · raw WebGL (no three.js) · React Router 7 · Lucide icons. Fonts are self-hosted (Archivo variable width, Chakra Petch, JetBrains Mono via Fontsource).
 
 ---
 
@@ -27,7 +27,7 @@ npm run dev          # http://localhost:5173
 
 | Route      | Page                                                                                   |
 | ---------- | -------------------------------------------------------------------------------------- |
-| `/`        | Home — hero, manifesto, selected work (`/#work`), toolkit, about teaser, contact invitation |
+| `/`        | Home — hero, manifesto, selected work (`/#work`), arsenal (toolkit), operator profile, contact invitation |
 | `/about`   | Biography, timeline, philosophy, promotions, toolkit, resume                           |
 | `/contact` | Contact details and form                                                               |
 
@@ -70,19 +70,20 @@ The original PDF lives at `public/resume/Jatin-Kumar-Resume.pdf` and is linked f
 
 ## Design system
 
-- **Tokens:** `src/styles/theme.css` is the single source of truth — palette (porcelain, ink, charcoal, muted, hairlines, one vermilion accent, status colours), font families, fluid type scale (`text-mega` → `text-micro`), spacing and easing. Swap the accent by changing `--accent` / `--accent-ink`. WebGL and canvas scenes read the same CSS variables at runtime.
-- **Component classes:** `src/styles/globals.css` — `.shell`, `.grid-12`, `.btn`, `.tag`, `.eyebrow`, `.meta`, `.provenance`, `.ui-frame`, `.blueprint`, cursor, preloader/hero helpers.
-- **Motion:** `src/lib/animation.ts` registers GSAP plugins and shared eases/breakpoints. `src/components/animations/Reveal.tsx` provides `Reveal`, `SplitReveal` and `DrawOnScroll`. Everything animates *from* a visible state, so content is readable with JS or motion disabled.
+- **Tokens:** `src/styles/theme.css` is the single source of truth — void surfaces, signal colours (`--neon` yellow, `--cyan`, `--magenta`), font families, fluid type scale (`text-mega` → `text-micro`), spacing and easing. The WebGL shader reads the same CSS variables at runtime, so changing a colour re-skins the city too.
+- **Component classes:** `src/styles/globals.css` — `.shell`, `.grid-12`, `.btn` (chamfered; `.btn-solid` / `.btn-ink` / `.btn-ink-outline`), `.hud`, `.hud-frame`, `.chamfer`, `.glitch` (RGB-split via `data-text`), `.stroke`, `.tag`, `.pip`, `.caret`, `.scan-sweep`, CRT overlays (`.fx-scanlines`, `.fx-vignette`, `.fx-grain`) and the reticle cursor.
+- **Motion:** `src/lib/animation.ts` registers GSAP plugins, the custom `servo` / `lock` eases and the scramble glyph set. `src/components/animations/Reveal.tsx` provides `Reveal` (flicker-in), `SplitReveal` (scattered char punch-in), `Decrypt` (glyph-scramble text) and `DrawOnScroll`. Everything animates *from* a visible state, so content is readable with JS or motion disabled.
+- **Hero shader:** `src/components/fx/NeonCity.tsx` — one fragment shader (grid floor, two-layer procedural skyline, digital rain, chromatic aberration, block glitch). Mouse parallaxes the camera, scroll warps speed. Renders at reduced resolution, pauses off-screen, draws a single static frame under reduced motion, and falls back to a CSS gradient grid without WebGL or on context loss.
 - **Smooth scroll:** `src/lib/smooth-scroll.tsx` runs Lenis on GSAP's ticker so ScrollTrigger and Lenis share one clock. It is disabled entirely under reduced motion.
 
 ## Motion, accessibility & fallbacks
 
 - `prefers-reduced-motion` is respected everywhere; visitors can also toggle **Reduce motion** in the footer (stored per browser).
-- The preloader plays once per session (replay from the footer), measures real readiness (fonts, document load, hero 3D chunk), and never blocks for more than ~4.2 s. A **Skip intro** button is focused on entry.
-- The hero WebGL scene pauses off-screen and in background tabs, caps device pixel ratio, and falls back to an SVG axonometric drawing when WebGL is unavailable, fails or loses context.
-- The sticky stacking work cards only run on wide screens with motion enabled; elsewhere they're a plain vertical list with entrance reveals.
+- The boot-sequence preloader plays once per session (replay from the footer), shows real readiness checks (fonts, document load, WebGL), and never blocks for more than ~4.2 s. **Skip intro** is focused on entry and Escape skips too.
+- The hero shader pauses off-screen and in background tabs, caps device pixel ratio, and falls back to a CSS grid when WebGL is unavailable, fails or loses context.
+- Pinned sections (hero warp, manifesto decrypt, horizontal work stream) only pin on wide screens with motion enabled; on phones they scroll normally, and the work stream becomes a vertical list.
 - Keyboard: skip link, focus-trapped fullscreen menu (Escape closes), screenshot lightbox (native `<dialog>`), visible focus rings.
-- Custom cursor appears only for fine pointers and never replaces the system cursor.
+- The reticle cursor appears only for fine pointers and never replaces the system cursor. CRT overlays are decorative and never intercept input.
 
 ---
 
@@ -125,14 +126,14 @@ msedge --headless=new --window-size=1200,630 --screenshot=public/og-image.png sc
 src/
   app/               App (router + providers), RootLayout, RouteError
   components/
-    3d/              HeroScene (R3F), HeroStage (fallback logic), HeroFallback (SVG)
-    animations/      Reveal, SplitReveal, DrawOnScroll, Marquee, ScrambleText
+    animations/      Reveal, SplitReveal, Decrypt, DrawOnScroll, Marquee
+    fx/              NeonCity (raw WebGL hero shader)
     buttons/         Button, ButtonLink, ButtonAnchor, CopyButton, Magnetic
     layout/          Footer, Cursor, Seo, ErrorBoundary
     navigation/      Header, MenuOverlay, Monogram
     preloader/       Preloader + session state
-    sections/        Home sections (Hero, Manifesto, SelectedWork, AboutTeaser), Stack, ContactCTA
-    typography/      Eyebrow, ProvenanceBadge, Annotation
+    sections/        Home sections (Hero, Manifesto, SelectedWork, Profile), Stack, ContactCTA
+    typography/      Eyebrow, SectionBar, SourceNote
   data/              All content (see "Editing content")
   hooks/             useMediaQuery, useLocalTime
   lib/               animation, motion-preferences, smooth-scroll, webgl, utils

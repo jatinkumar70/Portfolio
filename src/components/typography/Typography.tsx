@@ -1,44 +1,41 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-/** Where a statement comes from — rendered as a provenance badge. */
-export type Provenance = 'fact' | 'concept' | 'experiment'
 
-/** Mono metadata label with an optional index — e.g. "02 — About". */
+/** HUD label with an optional index — renders as "[01] // ABOUT". */
 export function Eyebrow({ index, children, className }: { index?: string; children: ReactNode; className?: string }) {
   return (
-    <p className={cn('eyebrow flex items-center gap-3', className)}>
-      {index && <span className="text-ink">{index}</span>}
-      {index && <span aria-hidden="true" className="h-px w-8 bg-current opacity-50" />}
+    <p className={cn('hud flex items-center gap-3', className)}>
+      {index && <span className="text-neon">[{index}]</span>}
+      <span aria-hidden="true" className="text-line-strong">
+        //
+      </span>
       <span>{children}</span>
     </p>
   )
 }
 
-const provenanceCopy: Record<Provenance, string> = {
-  fact: 'Fact · from resume',
-  concept: 'Concept · illustrative reconstruction',
-  experiment: 'Experiment · portfolio lab',
-}
-
 /**
- * Marks where content comes from. Every interface mock, demo and claim on the
- * site carries one so visitors never confuse a concept with production work.
+ * Section header bar: index + label on the left, a running rule, an optional
+ * readout on the right. Sits on top of every major section.
  */
-export function ProvenanceBadge({ kind, children, className }: { kind: Provenance; children?: ReactNode; className?: string }) {
-  const color = kind === 'fact' ? 'text-ink' : kind === 'concept' ? 'text-accent-ink' : 'text-info'
+export function SectionBar({ index, label, right, className }: { index: string; label: string; right?: ReactNode; className?: string }) {
   return (
-    <span className={cn('provenance', color, className)} data-kind={kind}>
-      {children ?? provenanceCopy[kind]}
-    </span>
+    <div className={cn('flex items-center gap-4', className)}>
+      <Eyebrow index={index}>{label}</Eyebrow>
+      <span aria-hidden="true" className="relative h-px flex-1 bg-line-strong">
+        <span className="absolute left-0 top-1/2 h-[3px] w-10 -translate-y-1/2 bg-neon" />
+      </span>
+      {right && <span className="hud hidden sm:inline">{right}</span>}
+    </div>
   )
 }
 
-/** A thin technical annotation: leader line + mono note. */
-export function Annotation({ children, className, align = 'left' }: { children: ReactNode; className?: string; align?: 'left' | 'right' }) {
+/** Small source note — keeps claims honest ("from resume"). */
+export function SourceNote({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className={cn('meta inline-flex items-center gap-2', align === 'right' && 'flex-row-reverse', className)}>
-      <span aria-hidden="true" className="inline-block h-px w-6 bg-current" />
-      <span>{children}</span>
+    <span className={cn('hud inline-flex items-center gap-2 border border-line-strong px-2 py-1 text-fg-2', className)}>
+      <span aria-hidden="true" className="h-1.5 w-1.5 bg-ok" />
+      {children}
     </span>
   )
 }

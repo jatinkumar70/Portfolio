@@ -1,7 +1,7 @@
 import { useLocation } from 'react-router-dom'
 import { Seo } from '@/components/layout/Seo'
 import { ButtonLink } from '@/components/buttons/Button'
-import { DrawOnScroll } from '@/components/animations/Reveal'
+import { Decrypt } from '@/components/animations/Reveal'
 
 export default function NotFoundPage() {
   const { pathname } = useLocation()
@@ -9,26 +9,24 @@ export default function NotFoundPage() {
     <>
       <Seo title="Not found" description="This page does not exist." />
       <meta name="robots" content="noindex" />
-      <section className="shell flex min-h-[100svh] flex-col justify-center pb-20 pt-[calc(var(--header-h)+3rem)]">
-        <p className="eyebrow">Error 404 · {pathname}</p>
-        <div className="mt-8 grid items-end gap-10 md:grid-cols-[1fr_auto]">
-          <h1 className="display text-mega">
-            Off the
-            <br />
-            grid<span className="text-accent">.</span>
-          </h1>
-          <DrawOnScroll className="w-40 md:w-56">
-            <svg viewBox="0 0 120 120" fill="none" aria-hidden="true">
-              <path data-draw d="M10 60 H110 M60 10 V110" stroke="var(--line-strong)" />
-              <circle data-draw cx="60" cy="60" r="40" stroke="var(--ink)" />
-              <path data-draw d="M88 32 L104 16" stroke="var(--accent)" strokeWidth="2" />
-            </svg>
-          </DrawOnScroll>
-        </div>
-        <p className="mt-8 max-w-[44ch] text-charcoal">This route doesn&apos;t exist — the index below does.</p>
+      <section className="shell relative flex min-h-[100svh] flex-col justify-center pb-20 pt-[calc(var(--header-h)+3rem)]">
+        <p className="hud text-magenta">
+          ERR_404 // <span className="normal-case">{pathname}</span>
+        </p>
+        <h1 className="display mt-8 text-[clamp(4rem,16vw,16rem)] leading-[0.8]">
+          <span className="glitch block text-neon neon-glow" data-text="SIGNAL" data-live="true">
+            SIGNAL
+          </span>
+          <span className="glitch stroke block [--stroke:var(--fg)]" data-text="LOST" data-live="true">
+            LOST
+          </span>
+        </h1>
+        <p className="hud mt-8 max-w-[44ch] normal-case tracking-[0.04em] text-fg-2">
+          <Decrypt text="> This node doesn't exist on the grid. The index below does." />
+        </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <ButtonLink to="/" variant="solid">
-            Back home
+            Back to index
           </ButtonLink>
           <ButtonLink to="/#work">Selected work</ButtonLink>
         </div>

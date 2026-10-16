@@ -1,153 +1,240 @@
 import { useRef, useState } from 'react'
-import { Maximize2, X } from 'lucide-react'
+import { ArrowRight, Maximize2, X } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { projects } from '@/data/projects'
 import type { Project } from '@/types/content'
-import { gsap, useGSAP, ease, motionDisabled } from '@/lib/animation'
+import { gsap, useGSAP, ease, motionDisabled, ScrollTrigger } from '@/lib/animation'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useReducedMotion } from '@/lib/motion-preferences'
-import { Eyebrow } from '@/components/typography/Typography'
+import { SectionBar } from '@/components/typography/Typography'
 import { SplitReveal } from '@/components/animations/Reveal'
 import { cn } from '@/lib/utils'
 import { useSmoothScroll } from '@/lib/smooth-scroll'
 
 /**
- * Selected work as a deck of sticky cards. On wide screens with motion on,
- * each card pins under the header and the one beneath recedes as the next
- * slides over it; screenshots unmask and settle as they arrive. Elsewhere the
- * cards simply stack with entrance reveals — no scroll-jacking on phones.
+ * Selected work as a horizontal data-stream. On wide screens with motion on,
+ * the section pins and vertical scroll drives the track sideways; the track
+ * skews with scroll velocity, screenshots unclip as they slide in and a HUD
+ * counter tracks the active project. Elsewhere it is a plain vertical list.
  */
 export function SelectedWork() {
   const root = useRef<HTMLElement>(null)
   const desktop = useMediaQuery('(min-width: 64rem)')
   const reduced = useReducedMotion()
-  const stacking = desktop && !reduced
+  const horizontal = desktop && !reduced
   const [open, setOpen] = useState<Project | null>(null)
 
   useGSAP(
     () => {
       const el = root.current
       if (!el || motionDisabled()) return
-      const cards = gsap.utils.toArray<HTMLElement>('[data-card]', el)
+      const q = gsap.utils.selector(el)
+      const panels = q('[data-panel]')
 
-      cards.forEach((card, i) => {
-        const shot = card.querySelector('[data-shot]')
-        const copy = card.querySelectorAll('[data-copy]')
+      if (!horizontal) {
+        panels.forEach((p) => {
+          const shot = p.querySelector('[data-shot]')
+          if (shot)
+            gsap.fromTo(
+              shot,
+              { clipPath: 'inset(0% 100% 0% 0%)' },
+              { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: ease.servo, scrollTrigger: { trigger: p, start: 'top 75%', once: true } },
+            )
+          gsap.from(p.querySelectorAll('[data-copy]'), {
+            y: 30,
+            autoAlpha: 0,
+            duration: 0.9,
+            stagger: 0.06,
+            ease: ease.out,
+            scrollTrigger: { trigger: p, start: 'top 75%', once: true },
+          })
+        })
+        return
+      }
 
-        // Screenshot: clip open + settle as the card arrives.
+      const track = q('[data-track]')[0] as HTMLElement
+      const distance = () => track.scrollWidth - window.innerWidth
+      const skew = gsap.quickTo(track, 'skewX', { duration: 0.4, ease: 'power3.out' })
+      // onUpdate stops firing when scrolling stops, so ease the shear back to 0 shortly after
+      const settle = gsap.delayedCall(0.12, () => skew(0)).pause()
+      const counter = q('[data-counter]')[0]
+      const bar = q('[data-bar]')[0]
+
+      const tween = gsap.to(track, {
+        x: () => -distance(),
+        ease: 'none',
+        scrollTrigger: {
+          trigger: q('[data-hpin]')[0],
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 0.8,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            skew(gsap.utils.clamp(-8, 8, self.getVelocity() / -400))
+            settle.restart(true)
+            const n = projects.length
+            const i = Math.min(n, Math.max(1, Math.round(self.progress * (n + 1))))
+            if (counter) counter.textContent = String(i).padStart(2, '0')
+            if (bar) (bar as HTMLElement).style.transform = `scaleX(${self.progress})`
+          },
+          onLeave: () => skew(0),
+          onLeaveBack: () => skew(0),
+        },
+      })
+
+      panels.forEach((p) => {
+        const shot = p.querySelector('[data-shot]')
+        const num = p.querySelector('[data-num]')
         if (shot)
           gsap.fromTo(
             shot,
-            { clipPath: 'inset(12% 10% 12% 10%)', scale: 1.08 },
+            { clipPath: 'inset(0% 0% 0% 100%)', scale: 1.15 },
             {
               clipPath: 'inset(0% 0% 0% 0%)',
               scale: 1,
               ease: 'none',
-              scrollTrigger: { trigger: card, start: 'top 90%', end: stacking ? 'top 15%' : 'top 40%', scrub: 0.6 },
+              scrollTrigger: { trigger: p, containerAnimation: tween, start: 'left 95%', end: 'left 35%', scrub: true },
             },
           )
-        gsap.from(copy, {
-          y: 40,
+        if (num)
+          gsap.fromTo(num, { xPercent: 60 }, { xPercent: -30, ease: 'none', scrollTrigger: { trigger: p, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true } })
+        gsap.from(p.querySelectorAll('[data-copy]'), {
           autoAlpha: 0,
-          duration: 1,
-          stagger: 0.07,
+          x: 60,
+          duration: 0.8,
+          stagger: 0.05,
           ease: ease.out,
-          scrollTrigger: { trigger: card, start: 'top 70%', once: true },
+          scrollTrigger: { trigger: p, containerAnimation: tween, start: 'left 70%', toggleActions: 'play none none reverse' },
         })
-
-        // Stacking: the card below recedes while the next one covers it.
-        const next = cards[i + 1]
-        if (stacking && next) {
-          gsap.fromTo(card.querySelector('[data-card-inner]'), { scale: 1 }, {
-            scale: 0.93,
-            ease: 'none',
-            scrollTrigger: { trigger: next, start: 'top bottom', end: 'top top+=120', scrub: true },
-          })
-        }
       })
+
+      // images load lazily and change the track width
+      const imgs = Array.from(el.querySelectorAll('img'))
+      const refresh = () => ScrollTrigger.refresh()
+      imgs.forEach((img) => !img.complete && img.addEventListener('load', refresh, { once: true }))
+      return () => imgs.forEach((img) => img.removeEventListener('load', refresh))
     },
-    { scope: root, dependencies: [stacking], revertOnUpdate: true },
+    { scope: root, dependencies: [horizontal], revertOnUpdate: true },
   )
 
   return (
-    <section ref={root} id="work" aria-labelledby="work-title" className="scroll-mt-16 pt-[var(--section-y)]">
-      <div className="shell">
-        <div className="grid-12 gap-y-6 border-t border-ink pt-6">
-          <div className="col-span-4 md:col-span-3">
-            <Eyebrow index="02">Selected work</Eyebrow>
-          </div>
-          <div className="col-span-4 md:col-span-9">
-            <SplitReveal as="h2" id="work-title" className="display text-display">
-              Things I&apos;ve
+    <section ref={root} id="work" aria-labelledby="work-title" className="relative scroll-mt-16 bg-void">
+      <div data-hpin className={cn('relative', horizontal ? 'h-[100svh] overflow-hidden' : 'py-[var(--section-y)]')}>
+        {horizontal && <div aria-hidden="true" className="grid-bg absolute inset-0 opacity-40" />}
+
+        <div
+          data-track
+          className={cn(
+            'relative',
+            horizontal ? 'flex h-full w-max items-center gap-[5vw] pl-[var(--gutter)] pr-[12vw] pt-[var(--header-h)] will-change-transform' : 'shell flex flex-col gap-20',
+          )}
+        >
+          {/* intro panel */}
+          <div className={cn('flex shrink-0 flex-col justify-center', horizontal && 'w-[min(38rem,42vw)]')}>
+            <SectionBar index="02" label="Selected work" />
+            <SplitReveal as="h2" id="work-title" className="display mt-8 text-[clamp(3rem,7.5vw,8.5rem)] leading-[0.82]">
+              Shipped
               <br />
-              shipped.
+              <span className="stroke [--stroke:var(--neon)]">to prod.</span>
             </SplitReveal>
-            <p className="mt-6 max-w-[54ch] text-[1.02rem] text-charcoal">
+            <p className="mt-8 max-w-[44ch] text-[1.02rem] leading-relaxed text-fg-2">
               Business operations, hospitality, roadside assistance and education — dashboards, data-heavy admin panels and the consumer
               experiences around them.
             </p>
+            <p className="hud mt-8 flex items-center gap-3">
+              <span className="text-neon">{String(projects.length).padStart(2, '0')}</span> case files
+              {horizontal && (
+                <>
+                  <span className="h-px w-10 bg-line-strong" aria-hidden="true" />
+                  scroll <ArrowRight size={12} aria-hidden="true" className="text-neon" />
+                </>
+              )}
+            </p>
+          </div>
+
+          {projects.map((p) => (
+            <ProjectPanel key={p.slug} project={p} horizontal={horizontal} onOpen={() => setOpen(p)} />
+          ))}
+
+          {/* outro panel */}
+          <div className={cn('flex shrink-0 flex-col justify-center gap-6', horizontal && 'w-[min(30rem,34vw)]')}>
+            <p className="hud text-cyan">&gt; end of stream</p>
+            <p className="display text-h1 leading-[0.9]">
+              More in the <span className="text-neon">dossier.</span>
+            </p>
+            <Link to="/about" className="btn self-start" data-cursor="link">
+              <span>Read the full story</span>
+              <ArrowRight className="btn-arrow" size={16} strokeWidth={1.5} aria-hidden="true" />
+            </Link>
           </div>
         </div>
-      </div>
 
-      <ol className="shell mt-14 md:mt-20">
-        {projects.map((p, i) => (
-          <li
-            key={p.slug}
-            data-card
-            className={cn('relative', stacking ? 'sticky top-[calc(var(--header-h)+1.5rem)] pb-[12vh]' : 'mb-16 md:mb-24')}
-            style={{ zIndex: i + 1 }}
-          >
-            <ProjectCard project={p} onOpen={() => setOpen(p)} />
-          </li>
-        ))}
-      </ol>
-      {/* lets the final sticky card finish its scroll before the next section */}
-      {stacking && <div aria-hidden="true" className="h-[10vh]" />}
+        {horizontal && (
+          <div aria-hidden="true" className="shell absolute inset-x-0 bottom-6 flex items-center gap-5">
+            <span className="hud">
+              File <span data-counter className="tabular text-neon">01</span> / {String(projects.length).padStart(2, '0')}
+            </span>
+            <span className="relative h-[2px] flex-1 bg-line">
+              <span data-bar className="absolute inset-0 origin-left scale-x-0 bg-gradient-to-r from-cyan via-magenta to-neon" />
+            </span>
+            <span className="hud">Scroll ↓ = →</span>
+          </div>
+        )}
+      </div>
 
       <Lightbox project={open} onClose={() => setOpen(null)} />
     </section>
   )
 }
 
-function ProjectCard({ project: p, onOpen }: { project: Project; onOpen: () => void }) {
+function ProjectPanel({ project: p, horizontal, onOpen }: { project: Project; horizontal: boolean; onOpen: () => void }) {
   return (
     <article
-      data-card-inner
+      data-panel
       aria-labelledby={`p-${p.slug}`}
       className={cn(
-        'grid origin-top items-center gap-8 border border-ink bg-porcelain p-5 will-change-transform md:p-8 lg:grid-cols-[minmax(17rem,0.85fr)_2fr] lg:gap-10',
+        'hud-frame relative grid shrink-0 gap-8 overflow-hidden p-5 md:p-8',
+        horizontal ? 'h-[min(76svh,46rem)] w-[min(82vw,84rem)] grid-cols-[minmax(18rem,0.8fr)_1.6fr] items-center gap-10' : 'lg:grid-cols-[minmax(17rem,0.85fr)_2fr]',
       )}
     >
-      <div className="order-2 flex min-w-0 flex-col lg:order-1">
-        <div data-copy className="flex items-baseline justify-between gap-4 border-b border-line pb-4">
-          <span className="display text-[clamp(3rem,6vw,5.5rem)] leading-none text-transparent [-webkit-text-stroke:1.2px_var(--ink)]" aria-hidden="true">
-            {p.index}
+      <span
+        data-num
+        aria-hidden="true"
+        className="display stroke pointer-events-none absolute -bottom-[0.18em] right-[2%] text-[clamp(8rem,22vw,22rem)] leading-none opacity-50 [--stroke:var(--line-strong)]"
+      >
+        {p.index}
+      </span>
+
+      <div className="relative order-2 flex min-w-0 flex-col lg:order-1">
+        <div data-copy className="flex items-center justify-between gap-4 border-b border-line-strong pb-3">
+          <span className="hud">
+            <span className="text-neon">FILE_{p.index}</span> // {p.context}
           </span>
-          <span className="meta text-right">
-            {p.context}
-            <br />
-            {p.period}
-          </span>
+          <span className="hud text-right">{p.period}</span>
         </div>
-        <h3 data-copy id={`p-${p.slug}`} className="display mt-6 text-h1">
-          {p.title}
+        <h3 data-copy id={`p-${p.slug}`} className="display mt-6 text-[clamp(2rem,3.6vw,3.8rem)] leading-[0.9]">
+          <span className="glitch" data-text={p.title.toUpperCase()}>
+            {p.title}
+          </span>
         </h3>
-        <p data-copy className="display-wide mt-2 text-[1.02rem] font-normal text-charcoal">
-          {p.kicker}
+        <p data-copy className="hud mt-3 text-cyan">
+          &gt; {p.kicker}
         </p>
-        <p data-copy className="mt-5 text-[0.98rem] leading-relaxed text-charcoal">
+        <p data-copy className="mt-5 text-[0.98rem] leading-relaxed text-fg-2">
           {p.summary}
         </p>
         <ul data-copy className="mt-5 space-y-2 border-t border-line pt-4">
           {p.highlights.map((h) => (
-            <li key={h} className="flex gap-3 text-[0.92rem] leading-snug text-ink">
-              <span aria-hidden="true" className="mt-[0.45em] h-1.5 w-1.5 shrink-0 bg-accent" />
+            <li key={h} className="flex gap-3 text-[0.92rem] leading-snug text-fg">
+              <span aria-hidden="true" className="mt-[0.5em] h-1.5 w-1.5 shrink-0 bg-neon shadow-[0_0_8px_var(--neon)]" />
               {h}
             </li>
           ))}
         </ul>
         {p.stack.length > 0 && (
-          <ul data-copy className="mt-auto flex flex-wrap gap-1.5 pt-6" aria-label="Technologies">
+          <ul data-copy className="mt-5 flex flex-wrap gap-1.5" aria-label="Technologies">
             {p.stack.map((s) => (
               <li key={s} className="tag">
                 {s}
@@ -157,17 +244,17 @@ function ProjectCard({ project: p, onOpen }: { project: Project; onOpen: () => v
         )}
       </div>
 
-      <div className="order-1 min-w-0 lg:order-2">
-        <div className="flex items-center justify-between gap-3 border border-b-0 border-ink bg-paper px-3 py-2">
+      <div className="relative order-1 min-w-0 lg:order-2">
+        <div className="flex items-center justify-between gap-3 border border-b-0 border-line-strong bg-panel-2 px-3 py-2">
           <span className="flex gap-1.5" aria-hidden="true">
-            <span className="h-2.5 w-2.5 rounded-full border border-ink" />
-            <span className="h-2.5 w-2.5 rounded-full border border-ink" />
-            <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+            <span className="h-2 w-2 bg-magenta" />
+            <span className="h-2 w-2 bg-neon" />
+            <span className="h-2 w-2 bg-cyan" />
           </span>
-          <span className="meta truncate">{p.url}</span>
-          <span className="meta">{p.role.split(' — ')[0]}</span>
+          <span className="hud truncate normal-case tracking-[0.06em]">{p.url}</span>
+          <span className="hud hidden sm:inline">{p.role.split(' — ')[0]}</span>
         </div>
-        <div className="relative overflow-hidden border border-ink bg-paper">
+        <div className="relative overflow-hidden border border-line-strong bg-void">
           {p.image ? (
             <button
               type="button"
@@ -177,17 +264,19 @@ function ProjectCard({ project: p, onOpen }: { project: Project; onOpen: () => v
               className="group block w-full"
               aria-label={`View ${p.title} screenshot full size`}
             >
-              <img
-                data-shot
-                src={p.image.src}
-                alt={p.image.alt}
-                width={p.image.width}
-                height={p.image.height}
-                loading="lazy"
-                decoding="async"
-                className="h-auto w-full"
-              />
-              <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center border border-ink bg-paper opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <span data-shot className="block">
+                <img
+                  src={p.image.src}
+                  alt={p.image.alt}
+                  width={p.image.width}
+                  height={p.image.height}
+                  loading="lazy"
+                  decoding="async"
+                  className={cn('rgb-hover w-full object-cover object-top', horizontal ? 'max-h-[min(56svh,34rem)]' : 'h-auto')}
+                />
+              </span>
+              <span className="scan-sweep" aria-hidden="true" />
+              <span className="absolute bottom-3 right-3 grid h-10 w-10 place-items-center bg-neon text-neon-ink opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
                 <Maximize2 size={16} aria-hidden="true" />
               </span>
             </button>
@@ -195,7 +284,7 @@ function ProjectCard({ project: p, onOpen }: { project: Project; onOpen: () => v
             <SchoolPlate />
           )}
         </div>
-        {p.image?.note && <p className="meta mt-2">{p.image.note}</p>}
+        {p.image?.note && <p className="hud mt-2">{p.image.note}</p>}
       </div>
     </article>
   )
@@ -205,17 +294,19 @@ function ProjectCard({ project: p, onOpen }: { project: Project; onOpen: () => v
 function SchoolPlate() {
   const modules = ['Students', 'Teachers', 'Admissions', 'Assignments', 'Homework']
   return (
-    <div data-shot className="blueprint relative flex aspect-[2.1/1] flex-col justify-between p-6 md:p-10">
-      <p className="eyebrow">React · Firebase Auth · Firestore</p>
+    <div data-shot className="grid-bg relative flex aspect-[2.1/1] flex-col justify-between p-6 md:p-10">
+      <p className="hud text-cyan">React · Firebase Auth · Firestore</p>
       <ul className="space-y-1">
         {modules.map((m, i) => (
-          <li key={m} className="display text-[clamp(1.1rem,2.4vw,2.3rem)] leading-[0.95]" style={{ paddingLeft: `${i * 6}%` }}>
+          <li key={m} className="display text-[clamp(1.1rem,2.3vw,2.2rem)] leading-[0.95]" style={{ paddingLeft: `${i * 6}%` }}>
+            <span className="mr-3 font-mono text-[0.45em] text-dim">0{i + 1}</span>
             {m}
-            {i === modules.length - 1 && <span className="text-accent">.</span>}
+            {i === modules.length - 1 && <span className="text-neon">_</span>}
           </li>
         ))}
       </ul>
-      <p className="meta">Screenshot not available — modules as listed in the resume.</p>
+      <p className="hud">Screenshot not available — modules as listed in the resume.</p>
+      <span className="scan-sweep" aria-hidden="true" />
     </div>
   )
 }
@@ -231,7 +322,8 @@ function Lightbox({ project, onClose }: { project: Project | null; onClose: () =
     if (img && !d.open) {
       d.showModal()
       lock()
-      if (!motionDisabled()) gsap.fromTo(d.querySelector('figure'), { y: 40, autoAlpha: 0, scale: 0.97 }, { y: 0, autoAlpha: 1, scale: 1, duration: 0.6, ease: ease.out })
+      if (!motionDisabled())
+        gsap.fromTo(d.querySelector('figure'), { clipPath: 'inset(50% 0% 50% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.6, ease: ease.servo })
     } else if (!img && d.open) d.close()
   }, [img])
 
@@ -247,16 +339,16 @@ function Lightbox({ project, onClose }: { project: Project | null; onClose: () =
       onClick={(e) => e.target === e.currentTarget && ref.current?.close()}
       data-lenis-prevent
       aria-label={project ? `${project.title} screenshot` : 'Screenshot'}
-      className="m-auto max-h-[92vh] w-[min(96vw,110rem)] max-w-none bg-transparent p-0 backdrop:bg-ink/85"
+      className="m-auto max-h-[92vh] w-[min(96vw,110rem)] max-w-none bg-transparent p-0 backdrop:bg-void/90 backdrop:backdrop-blur-sm"
     >
       {img && project && (
-        <figure className="border border-paper/30 bg-paper">
-          <div className="flex items-center justify-between gap-4 border-b border-line px-4 py-2">
-            <figcaption className="meta text-ink">
-              {project.index} — {project.title}
-              {img.note && <span className="text-muted-text"> · {img.note}</span>}
+        <figure className="hud-frame bg-panel">
+          <div className="flex items-center justify-between gap-4 border-b border-line-strong px-4 py-2">
+            <figcaption className="hud text-fg">
+              <span className="text-neon">FILE_{project.index}</span> // {project.title}
+              {img.note && <span className="text-dim"> · {img.note}</span>}
             </figcaption>
-            <button type="button" onClick={() => ref.current?.close()} className="grid h-10 w-10 place-items-center" aria-label="Close" autoFocus>
+            <button type="button" onClick={() => ref.current?.close()} className="grid h-10 w-10 place-items-center text-fg hover:text-neon" aria-label="Close" autoFocus>
               <X size={18} aria-hidden="true" />
             </button>
           </div>

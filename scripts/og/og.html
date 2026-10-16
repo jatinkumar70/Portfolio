@@ -5,35 +5,90 @@
 <style>
   @font-face { font-family: 'Archivo'; src: url('../../node_modules/@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2') format('woff2'); font-weight: 100 900; font-stretch: 62% 125%; }
   @font-face { font-family: 'Mono'; src: url('../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); font-weight: 100 800; }
-  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #fafaf7; }
-  .wrap { position: relative; width: 1200px; height: 630px; box-sizing: border-box; padding: 56px 64px; font-family: 'Archivo'; color: #111; }
-  .grid { position: absolute; inset: 0; background-image: linear-gradient(to right, #e6e5e0 1px, transparent 1px), linear-gradient(to bottom, #e6e5e0 1px, transparent 1px); background-size: 40px 40px; opacity: .7; }
-  .meta { font-family: 'Mono'; font-size: 17px; letter-spacing: .08em; text-transform: uppercase; color: #6a6a66; position: relative; }
-  h1 { position: relative; margin: 54px 0 0; font-weight: 800; font-stretch: 78%; text-transform: uppercase; font-size: 100px; line-height: .86; letter-spacing: -0.04em; }
-  h1 .i { padding-left: 120px; }
-  .dot { color: #ff4a1c; }
-  .foot { position: absolute; left: 64px; right: 64px; bottom: 52px; display: flex; justify-content: space-between; align-items: end; border-top: 2px solid #111; padding-top: 18px; }
-  .name { font-weight: 800; font-stretch: 100%; font-size: 30px; text-transform: uppercase; letter-spacing: -0.02em; }
-  .role { font-family: 'Mono'; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; margin-top: 6px; color: #292929; }
-  svg { position: absolute; right: 70px; top: 262px; width: 200px; }
+  /* Tokens mirror src/styles/theme.css (NEON//GRID) */
+  :root { --void: #050508; --line: #1d1d2b; --line-strong: #33334a; --fg: #ecebf5; --fg-2: #c3c2d6; --dim: #8b8aa6; --neon: #f5ee0b; --cyan: #00f0ff; --magenta: #ff2a6d; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--void); }
+  .wrap { position: relative; width: 1200px; height: 630px; box-sizing: border-box; padding: 50px 60px; font-family: 'Archivo'; color: var(--fg); overflow: hidden; }
+
+  /* Backdrop: faint sky grid, horizon glow, perspective floor, scanlines */
+  .sky { position: absolute; inset: 0; background-image: linear-gradient(to right, var(--line) 1px, transparent 1px), linear-gradient(to bottom, var(--line) 1px, transparent 1px); background-size: 48px 48px; opacity: .55;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 62%); }
+  .glow { position: absolute; left: -10%; right: -10%; top: 220px; height: 400px; background: radial-gradient(ellipse 48% 38% at 50% 50%, rgba(255,42,109,.22), rgba(0,240,255,.08) 55%, transparent 75%); }
+  .floor-wrap { position: absolute; left: 0; right: 0; top: 420px; bottom: 0; perspective: 260px; perspective-origin: 50% 0; overflow: hidden; }
+  .floor { position: absolute; left: -100%; right: -100%; top: 0; height: 900px; transform-origin: 50% 0; transform: rotateX(72deg);
+    background-image: linear-gradient(to right, rgba(255,42,109,.75) 2px, transparent 2px), linear-gradient(to bottom, rgba(0,240,255,.6) 2px, transparent 2px); background-size: 64px 64px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 22%, #000 100%); }
+  .horizon { position: absolute; left: 0; right: 0; top: 420px; height: 2px; background: linear-gradient(to right, transparent, var(--magenta) 20%, var(--cyan) 50%, var(--magenta) 80%, transparent); box-shadow: 0 0 18px var(--magenta), 0 0 40px rgba(0,240,255,.5); }
+  .fade { position: absolute; left: 0; right: 0; top: 440px; bottom: 0; background: linear-gradient(to bottom, rgba(5,5,8,.15), rgba(5,5,8,.92) 78%); }
+  .scan { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 4px); pointer-events: none; }
+
+  /* HUD corner brackets */
+  .corner { position: absolute; width: 26px; height: 26px; border: 0 solid var(--neon); }
+  .tl { left: 22px; top: 22px; border-left-width: 3px; border-top-width: 3px; }
+  .tr { right: 22px; top: 22px; border-right-width: 3px; border-top-width: 3px; }
+  .bl { left: 22px; bottom: 22px; border-left-width: 3px; border-bottom-width: 3px; }
+  .br { right: 22px; bottom: 22px; border-right-width: 3px; border-bottom-width: 3px; }
+
+  .hud { position: relative; font-family: 'Mono'; font-weight: 500; font-size: 17px; line-height: 1.55; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  .neon { color: var(--neon); } .cyan { color: var(--cyan); } .fgc { color: var(--fg); }
+  .top { position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+  .pip { display: inline-block; width: 10px; height: 10px; background: var(--ok, #3dff9a); box-shadow: 0 0 10px #3dff9a; margin-right: 10px; vertical-align: 1px; }
+
+  /* Name — Archivo 900 expanded, RGB-split glitch frozen mid-frame */
+  h1 { position: relative; margin: 34px 0 0; font-weight: 900; font-stretch: 125%; text-transform: uppercase; font-size: 158px; line-height: .8; letter-spacing: -0.02em; }
+  h1 .line { display: block; }
+  h1 .b { text-align: right; }
+  .g { position: relative; display: inline-block; isolation: isolate; }
+  .g::before, .g::after { content: attr(data-text); position: absolute; inset: 0; z-index: -1; }
+  .a.g::before { color: var(--cyan); transform: translate(-7px, 0); clip-path: inset(6% 0 48% 0); }
+  .a.g::after { color: var(--magenta); transform: translate(8px, 0); clip-path: inset(46% 0 8% 0); }
+  .stroke { color: transparent; -webkit-text-stroke: 2.5px var(--neon); }
+  .stroke.g::before { color: transparent; -webkit-text-stroke: 2.5px var(--cyan); transform: translate(-6px, 0); clip-path: inset(40% 0 44% 0); }
+  .stroke.g::after { color: transparent; -webkit-text-stroke: 2.5px var(--magenta); transform: translate(7px, 0); clip-path: inset(72% 0 10% 0); }
+
+  .rule { position: relative; margin-top: 30px; height: 2px; background: linear-gradient(to right, var(--neon), var(--magenta), var(--cyan)); box-shadow: 0 0 14px rgba(255,42,109,.55); }
+  .foot { position: relative; margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .role { font-weight: 800; font-stretch: 112%; font-size: 30px; text-transform: uppercase; letter-spacing: -0.005em; color: var(--fg); margin-top: 6px; }
+  .caret { display: inline-block; width: 11px; height: 19px; background: var(--neon); vertical-align: -3px; margin-left: 6px; }
+
+  .mono { position: relative; width: 92px; filter: drop-shadow(0 0 10px rgba(245,238,11,.35)); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="grid"></div>
-  <div class="meta">JK / Digital Engineering — Portfolio</div>
-  <h1>Complex systems.<br/><span class="i">Effortless</span><br/>experiences<span class="dot">.</span></h1>
-  <svg viewBox="-4 -4 62 60" fill="none">
-    <circle cx="27" cy="26" r="29" stroke="#cfcdc6" stroke-width=".4"/>
-    <path d="M-4 26 H58 M27 -4 V56" stroke="#cfcdc6" stroke-width=".4"/>
-    <g stroke="#111" stroke-width="3.2" stroke-linecap="square">
-      <path d="M6 8 H26 M20 8 V34 C20 41 15 44 10 44 C6 44 3 41.5 2.5 38"/><path d="M32 8 V44"/><path d="M50 8 L36.5 26 L50 44"/>
-    </g>
-    <rect x="34" y="23.5" width="5" height="5" fill="#ff4a1c"/>
-  </svg>
+  <div class="sky"></div>
+  <div class="glow"></div>
+  <div class="floor-wrap"><div class="floor"></div></div>
+  <div class="horizon"></div>
+  <div class="fade"></div>
+  <div class="scan"></div>
+  <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+
+  <div class="top">
+    <div class="hud">
+      <div><span class="neon">[00]</span> // Neon grid · portfolio</div>
+      <div>Ident: <span class="fgc">Jatin Kumar</span> · class: <span class="cyan">Frontend</span></div>
+    </div>
+    <svg class="mono" viewBox="0 0 54 52" fill="none">
+      <g stroke="#ecebf5" stroke-width="3.6" stroke-linecap="square">
+        <path d="M6 8 H26 M20 8 V34 C20 41 15 44 10 44 C6 44 3 41.5 2.5 38"/><path d="M32 8 V44"/><path d="M50 8 L36.5 26 L50 44" stroke-linejoin="miter"/>
+      </g>
+      <rect x="34" y="23.5" width="5" height="5" fill="#f5ee0b"/>
+    </svg>
+  </div>
+
+  <h1>
+    <span class="line"><span class="g a" data-text="JATIN">JATIN</span></span>
+    <span class="line b"><span class="g stroke" data-text="KUMAR">KUMAR</span></span>
+  </h1>
+
+  <div class="rule"></div>
   <div class="foot">
-    <div><div class="name">Jatin Kumar</div><div class="role">Senior Frontend Engineer</div></div>
-    <div class="meta">React · TypeScript · Real-time interfaces</div>
+    <div>
+      <div class="hud"><span class="neon">&gt;</span> focus: <span class="cyan">React + TypeScript · Real-time UIs</span><span class="caret"></span></div>
+      <div class="role">Senior Frontend Engineer</div>
+    </div>
+    <div class="hud" style="text-align:right"><div class="fgc">Complex systems.</div><div>Effortless experiences<span class="neon">.</span></div></div>
   </div>
 </div>
 </body>

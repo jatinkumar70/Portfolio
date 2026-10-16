@@ -2,7 +2,7 @@ import { useId, useRef, useState, type FormEvent } from 'react'
 import { ArrowUpRight, Mail } from 'lucide-react'
 import { site } from '@/data/site'
 import { Seo } from '@/components/layout/Seo'
-import { Eyebrow } from '@/components/typography/Typography'
+import { SectionBar } from '@/components/typography/Typography'
 import { SplitReveal, Reveal } from '@/components/animations/Reveal'
 import { Button, CopyButton, ButtonAnchor } from '@/components/buttons/Button'
 import { useLocalTime } from '@/hooks/useLocalTime'
@@ -87,17 +87,17 @@ function ContactForm() {
     }
   }
 
-  const field = 'mt-2 block w-full border-0 border-b border-ink bg-transparent px-0 py-3 text-[1.05rem] text-ink outline-none transition-colors placeholder:text-muted focus:border-accent focus-visible:outline-none'
+  const field = 'mt-2 block w-full border border-line-strong bg-panel/70 px-4 py-3 font-mono text-[0.98rem] text-fg outline-none transition-[border-color,box-shadow] placeholder:text-dim/60 focus:border-neon focus:shadow-[0_0_0_1px_var(--neon),0_0_24px_-6px_var(--neon)] focus-visible:outline-none aria-[invalid=true]:border-danger'
 
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate aria-describedby={`${uid}-mode`} className="space-y-9">
-      <p id={`${uid}-mode`} className="meta">
+      <p id={`${uid}-mode`} className="hud border-l-2 border-cyan pl-3 normal-case tracking-[0.04em]">
         {endpoint ? 'Messages are sent through the configured form service.' : 'No form backend is configured: sending opens your email app with this message pre-filled.'}
       </p>
 
       <div className="grid gap-9 md:grid-cols-2">
         <div>
-          <label htmlFor={`${uid}-name`} className="eyebrow text-ink">
+          <label htmlFor={`${uid}-name`} className="hud text-fg">
             Your name
           </label>
           <input
@@ -112,13 +112,13 @@ function ContactForm() {
             placeholder="Ada Lovelace"
           />
           {errors.name && (
-            <p id={`${uid}-name-err`} className="mt-2 text-[0.85rem] text-danger">
+            <p id={`${uid}-name-err`} className="mt-2 font-mono text-[0.8rem] text-danger">
               {errors.name}
             </p>
           )}
         </div>
         <div>
-          <label htmlFor={`${uid}-email`} className="eyebrow text-ink">
+          <label htmlFor={`${uid}-email`} className="hud text-fg">
             Email
           </label>
           <input
@@ -135,7 +135,7 @@ function ContactForm() {
             placeholder="you@company.com"
           />
           {errors.email && (
-            <p id={`${uid}-email-err`} className="mt-2 text-[0.85rem] text-danger">
+            <p id={`${uid}-email-err`} className="mt-2 font-mono text-[0.8rem] text-danger">
               {errors.email}
             </p>
           )}
@@ -143,14 +143,14 @@ function ContactForm() {
       </div>
 
       <fieldset>
-        <legend className="eyebrow text-ink">What&apos;s it about?</legend>
+        <legend className="hud text-fg">What&apos;s it about?</legend>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {TOPICS.map((t) => (
             <label
               key={t}
               className={cn(
-                'flex min-h-10 cursor-pointer items-center border px-3 font-mono text-[0.72rem] uppercase tracking-[0.05em] transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)]',
-                fields.topic === t ? 'border-ink bg-ink text-paper' : 'border-line-strong text-charcoal hover:border-ink',
+                'flex min-h-10 cursor-pointer items-center border px-3 font-mono text-[0.72rem] uppercase tracking-[0.05em] transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[var(--focus)] chamfer [--chamfer:7px]',
+                fields.topic === t ? 'border-neon bg-neon text-neon-ink shadow-[0_0_18px_-4px_var(--neon)]' : 'border-line-strong text-fg-2 hover:border-cyan hover:text-cyan',
               )}
             >
               <input type="radio" name="topic" value={t} checked={fields.topic === t} onChange={() => set('topic', t)} className="sr-only" />
@@ -161,7 +161,7 @@ function ContactForm() {
       </fieldset>
 
       <div>
-        <label htmlFor={`${uid}-message`} className="eyebrow text-ink">
+        <label htmlFor={`${uid}-message`} className="hud text-fg">
           Message
         </label>
         <textarea
@@ -176,7 +176,7 @@ function ContactForm() {
           placeholder="What are you building, and where could I help?"
         />
         {errors.message && (
-          <p id={`${uid}-message-err`} className="mt-2 text-[0.85rem] text-danger">
+          <p id={`${uid}-message-err`} className="mt-2 font-mono text-[0.8rem] text-danger">
             {errors.message}
           </p>
         )}
@@ -187,11 +187,11 @@ function ContactForm() {
           {status.kind === 'sending' ? 'Sending…' : endpoint ? 'Send message' : 'Compose email'}
         </Button>
         <div role="status" aria-live="polite" className="text-[0.92rem]">
-          {status.kind === 'sent' && <p className="text-ok">Thank you — your message was delivered. I&apos;ll reply by email.</p>}
+          {status.kind === 'sent' && <p className="font-mono text-ok">Thank you — your message was delivered. I&apos;ll reply by email.</p>}
           {status.kind === 'mailto' && (
-            <p className="max-w-[46ch] text-charcoal">
+            <p className="max-w-[46ch] text-fg-2">
               Your email app should now be open with the message ready to send. Nothing has been sent yet. If no app opened, write to{' '}
-              <a className="link-u text-ink" href={`mailto:${site.contact.email}`}>
+              <a className="link-u text-fg" href={`mailto:${site.contact.email}`}>
                 {site.contact.email}
               </a>
               .
@@ -214,27 +214,31 @@ function ContactForm() {
 
 export default function ContactPage() {
   const time = useLocalTime(site.location.timeZone)
+  const block = 'hud-frame p-5 md:p-6'
   return (
     <>
       <Seo title="Contact" description="Start a conversation with Jatin Kumar about frontend engineering, product development, complex interfaces or creative digital experiences." />
       <header className="shell pt-[calc(var(--header-h)+clamp(2.5rem,7vw,6rem))]">
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-5">
-          <Eyebrow index="04">Contact</Eyebrow>
-          {site.availability.show && (
-            <p className="meta flex items-center gap-2 text-ink">
-              <span className="h-2 w-2 bg-accent" aria-hidden="true" />
-              {site.availability.label}
-            </p>
-          )}
-        </div>
-        <SplitReveal as="h1" immediate className="display mt-10 text-mega md:mt-14">
+        <SectionBar
+          index="03"
+          label="Open channel"
+          right={
+            site.availability.show && (
+              <span className="flex items-center gap-2 text-fg">
+                <span className="pip" aria-hidden="true" />
+                {site.availability.label}
+              </span>
+            )
+          }
+        />
+        <SplitReveal as="h1" immediate className="display mt-10 text-[clamp(2.8rem,10vw,11rem)] leading-[0.82] md:mt-14">
           Have something
           <br />
-          <span className="md:pl-[10vw]">interesting</span>
+          <span className="stroke [--stroke:var(--neon)]">interesting</span>
           <br />
-          to build<span className="text-accent">?</span>
+          to build<span className="text-magenta">?</span>
         </SplitReveal>
-        <p className="mt-10 max-w-[52ch] text-lead text-charcoal">
+        <p className="mt-10 max-w-[52ch] text-lead text-fg-2">
           I&apos;m always glad to talk about frontend engineering, product development, complex interfaces and creative digital
           experiences — a role, a project, or an idea that needs a sounding board.
         </p>
@@ -242,20 +246,20 @@ export default function ContactPage() {
 
       <section aria-label="Ways to reach me" className="shell section">
         <div className="grid-12 gap-y-16">
-          <Reveal stagger={0.08} className="col-span-4 space-y-10 md:col-span-5">
-            <div className="border-t border-ink pt-5">
-              <p className="eyebrow">Email — fastest</p>
-              <a href={`mailto:${site.contact.email}`} className="link-u mt-3 break-all text-[clamp(1.25rem,2.2vw,1.9rem)] font-bold tracking-tight" data-cursor="link">
-                <Mail size={20} aria-hidden="true" />
+          <Reveal stagger={0.08} className="col-span-4 space-y-4 md:col-span-5">
+            <div className={block}>
+              <p className="hud text-neon">Email — fastest</p>
+              <a href={`mailto:${site.contact.email}`} className="link-u mt-3 break-all font-mono text-[clamp(1.05rem,1.9vw,1.5rem)] font-semibold" data-cursor="link">
+                <Mail size={18} aria-hidden="true" />
                 {site.contact.email}
               </a>
               <div className="mt-4">
                 <CopyButton value={site.contact.email} label="Copy email" />
               </div>
             </div>
-            <div className="border-t border-ink pt-5">
-              <p className="eyebrow">Elsewhere</p>
-              <ul className="mt-3 divide-y divide-line">
+            <div className={block}>
+              <p className="hud text-cyan">Uplinks</p>
+              <ul className="mt-2 divide-y divide-line-strong">
                 {[
                   { label: 'LinkedIn', href: site.contact.linkedin, note: 'Professional profile' },
                   { label: 'GitHub', href: site.contact.github, note: 'Code' },
@@ -263,33 +267,33 @@ export default function ContactPage() {
                   <li key={l.label}>
                     <a href={l.href} target="_blank" rel="noreferrer" className="group flex min-h-14 items-center justify-between gap-4 py-3" data-cursor="link">
                       <span>
-                        <span className="display block text-h3 transition-transform duration-500 group-hover:translate-x-2">{l.label}</span>
-                        <span className="meta">{l.note}</span>
+                        <span className="display block text-h3 transition-[transform,color] duration-300 group-hover:translate-x-2 group-hover:text-neon">{l.label}</span>
+                        <span className="hud">{l.note}</span>
                       </span>
-                      <ArrowUpRight size={20} aria-hidden="true" className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                      <ArrowUpRight size={20} aria-hidden="true" className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-neon" />
                       <span className="sr-only">(opens in a new tab)</span>
                     </a>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="border-t border-ink pt-5">
-              <p className="eyebrow">Resume</p>
+            <div className={block}>
+              <p className="hud text-magenta">Dossier</p>
               <div className="mt-4">
                 <ButtonAnchor href={site.resume.href} download={site.resume.fileName} arrow="none">
-                  Download PDF
+                  Download resume (PDF)
                 </ButtonAnchor>
               </div>
             </div>
-            <div className="border-t border-ink pt-5">
-              <p className="eyebrow">Where &amp; when</p>
-              <p className="mt-3 text-[1rem] text-charcoal">
+            <div className={block}>
+              <p className="hud">Where &amp; when</p>
+              <p className="mt-3 text-[1rem] text-fg-2">
                 {site.location.label}
                 {time && (
                   <>
                     <br />
-                    <span className="meta">
-                      Local time {time} {site.location.tzLabel} (calculated in your browser)
+                    <span className="hud normal-case tracking-[0.04em]">
+                      Local time <span className="text-neon">{time}</span> {site.location.tzLabel} (calculated in your browser)
                     </span>
                   </>
                 )}
@@ -298,8 +302,9 @@ export default function ContactPage() {
           </Reveal>
 
           <div className="col-span-4 md:col-span-6 md:col-start-7">
-            <div className="border-t border-ink pt-5">
-              <h2 className="display text-h2">Write a note</h2>
+            <div className="hud-frame p-5 [--frame-accent:var(--cyan)] md:p-8">
+              <p className="hud text-cyan">&gt; compose transmission</p>
+              <h2 className="display mt-3 text-h2">Write a note</h2>
               <div className="mt-8">
                 <ContactForm />
               </div>

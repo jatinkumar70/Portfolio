@@ -7,7 +7,7 @@ export function Monogram({ className, title = 'Jatin Kumar — home', strokeWidt
       <path d={MONOGRAM_PATHS.j} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="square" />
       <path d={MONOGRAM_PATHS.kStem} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="square" />
       <path d={MONOGRAM_PATHS.kArms} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="square" strokeLinejoin="miter" />
-      <rect x="34" y="23.5" width="5" height="5" fill="var(--accent)" />
+      <rect x="34" y="23.5" width="5" height="5" fill="var(--neon)" />
     </svg>
   )
 }

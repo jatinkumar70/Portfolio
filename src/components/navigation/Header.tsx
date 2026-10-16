@@ -6,12 +6,12 @@ import { useLocalTime } from '@/hooks/useLocalTime'
 import { cn } from '@/lib/utils'
 import { Monogram } from './Monogram'
 import { MenuOverlay } from './MenuOverlay'
-import { ScrambleText } from '@/components/animations/ScrambleText'
+import { Decrypt } from '@/components/animations/Reveal'
 
 /**
- * Fixed header. Transparent at the top of a page, then a solid porcelain bar
- * with a hairline. It tucks away while scrolling down and returns on scroll up
- * — but never while it holds keyboard focus or the menu is open.
+ * HUD bar. Transparent over the hero, then a blurred void panel with a neon
+ * hairline. Tucks away while scrolling down and returns on scroll up — but
+ * never while it holds keyboard focus or the menu is open.
  */
 export function Header() {
   const [open, setOpen] = useState(false)
@@ -57,35 +57,47 @@ export function Header() {
         ref={headerRef}
         onFocus={() => setHidden(false)}
         className={cn(
-          'fixed inset-x-0 top-0 z-50 transition-[transform,background-color,border-color] duration-500 ease-[var(--ease-out)]',
-          'border-b pt-[env(safe-area-inset-top)]',
-          scrolled ? 'border-line bg-porcelain' : 'border-transparent bg-transparent',
+          'fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-[transform,background-color,border-color] duration-500 ease-[var(--ease-servo)]',
+          'border-b',
+          scrolled ? 'border-line bg-void/75 backdrop-blur-md' : 'border-transparent bg-transparent',
           hidden && !open && '-translate-y-full',
         )}
       >
         <div className="shell flex h-[var(--header-h)] items-center justify-between gap-6">
-          <Link to="/" className="group flex items-center gap-3" data-cursor="link" aria-label={`${site.name} — home`}>
-            <Monogram className="h-7 transition-transform duration-500 group-hover:-rotate-6" title="" />
+          <Link to="/" className="group flex items-center gap-3" data-cursor="link" aria-label={`${site.name} — home`} data-decrypt-host>
+            <Monogram className="h-7 transition-transform duration-300 group-hover:skew-x-[-12deg]" title="" />
             <span className="hidden flex-col leading-none sm:flex">
-              <span className="font-display text-[0.95rem] font-bold uppercase tracking-tight">{site.name}</span>
-              <span className="meta mt-1 text-[0.65rem]">{site.role}</span>
+              <span className="font-mono text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-fg">
+                <Decrypt text="Jatin.Kumar" hover immediate />
+              </span>
+              <span className="hud mt-1.5 text-[0.6rem] text-dim">
+                <span className="text-neon">SYS</span>/frontend_eng
+              </span>
             </span>
           </Link>
 
           <nav aria-label="Primary" className="hidden lg:block">
-            <ul className="flex items-center gap-9">
+            <ul className="flex items-center gap-1">
               {primaryNav.map((item) => (
                 <li key={item.to}>
                   <NavLink
                     to={item.to}
                     end
                     data-cursor="link"
+                    data-decrypt-host
                     className={({ isActive }) =>
-                      cn('link-u group py-2 text-[0.86rem] font-medium tracking-tight', isActive ? 'text-ink' : 'text-charcoal')
+                      cn(
+                        'group relative flex items-center gap-2 px-4 py-2 font-mono text-[0.74rem] uppercase tracking-[0.16em] transition-colors',
+                        isActive ? 'text-neon' : 'text-fg-2 hover:text-fg',
+                      )
                     }
                   >
-                    <span className="mr-1.5 font-mono text-[0.62rem] text-muted-text">{item.index}</span>
-                    <ScrambleText text={item.label} />
+                    <span className="text-[0.62rem] text-dim group-hover:text-cyan">{item.index}</span>
+                    <Decrypt text={item.label} hover />
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-4 bottom-0 h-px origin-left scale-x-0 bg-neon transition-transform duration-300 group-hover:scale-x-100 group-aria-[current=page]:scale-x-100"
+                    />
                   </NavLink>
                 </li>
               ))}
@@ -94,9 +106,10 @@ export function Header() {
 
           <div className="flex items-center gap-5">
             {time && (
-              <p className="meta hidden xl:block" aria-label={`Local time for Jatin: ${time} ${site.location.tzLabel}`}>
-                <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-1px] bg-accent" aria-hidden="true" />
-                {site.location.tzLabel} {time}
+              <p className="hud hidden items-center gap-2 xl:flex" aria-label={`Local time for ${site.name}: ${time} ${site.location.tzLabel}`}>
+                <span className="pip" aria-hidden="true" />
+                <span className="text-fg-2">{site.location.tzLabel}</span>
+                <span className="tabular text-fg">{time}</span>
               </p>
             )}
             <button
@@ -106,22 +119,13 @@ export function Header() {
               aria-expanded={open}
               aria-controls="site-menu"
               data-cursor="link"
-              className="group relative flex h-11 min-w-11 items-center gap-3 px-1"
+              className="chamfer group relative flex h-11 items-center gap-3 border border-line-strong bg-panel/60 px-4 transition-colors hover:border-neon"
             >
-              <span className="font-mono text-[0.72rem] uppercase tracking-[0.08em]">{open ? 'Close' : 'Menu'}</span>
-              <span aria-hidden="true" className="relative block h-3 w-6">
-                <span
-                  className={cn(
-                    'absolute left-0 top-0 h-px w-full bg-ink transition-transform duration-500 ease-[var(--ease-out)]',
-                    open ? 'translate-y-1.5 rotate-45' : 'group-hover:translate-x-1',
-                  )}
-                />
-                <span
-                  className={cn(
-                    'absolute bottom-0 left-0 h-px w-full bg-ink transition-transform duration-500 ease-[var(--ease-out)]',
-                    open ? '-translate-y-1.5 -rotate-45' : 'w-2/3 group-hover:w-full',
-                  )}
-                />
+              <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] group-hover:text-neon">{open ? 'Close' : 'Menu'}</span>
+              <span aria-hidden="true" className="flex h-3 w-5 flex-col justify-between">
+                <span className="h-[2px] w-full bg-neon transition-transform duration-300 group-hover:translate-x-1" />
+                <span className="h-[2px] w-3/5 bg-fg transition-all duration-300 group-hover:w-full" />
+                <span className="h-[2px] w-4/5 bg-cyan transition-transform duration-300 group-hover:-translate-x-1" />
               </span>
             </button>
           </div>

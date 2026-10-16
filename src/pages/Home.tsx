@@ -3,7 +3,7 @@ import { Hero } from '@/components/sections/home/Hero'
 import { Manifesto } from '@/components/sections/home/Manifesto'
 import { SelectedWork } from '@/components/sections/home/SelectedWork'
 import { Stack } from '@/components/sections/Stack'
-import { AboutTeaser } from '@/components/sections/home/AboutTeaser'
+import { Profile } from '@/components/sections/home/Profile'
 import { ContactCTA } from '@/components/sections/ContactCTA'
 
 export default function HomePage() {
@@ -14,7 +14,7 @@ export default function HomePage() {
       <Manifesto />
       <SelectedWork />
       <Stack index="03" />
-      <AboutTeaser />
+      <Profile />
       <ContactCTA index="05" />
     </>
   )
